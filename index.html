@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUPStore Admin Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .input-focus {
+            transition: all 0.2s ease-in-out;
+        }
+        .input-focus:focus {
+            ring: 2px;
+            ring-color: #4f46e5;
+            border-color: #4f46e5;
+            outline: none;
+        }
+        .loader {
+            border-top-color: #3498db;
+            animation: spinner 1.5s linear infinite;
+        }
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="mb-8 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">QUPStore Admin Panel</h1>
+                <p class="text-gray-500">Create & Manage Individual App Admins</p>
+            </div>
+            <div class="flex gap-2">
+                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold uppercase tracking-wider">API v1 Active</span>
+                <span class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-semibold uppercase tracking-wider">Rainbow Life</span>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Form Section -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="glass-morphism rounded-2xl p-6 shadow-sm border border-gray-200">
+                    <h2 class="text-xl font-semibold mb-6 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Create New Admin
+                    </h2>
+                    
+                    <form id="adminForm" class="space-y-4">
+                        <!-- API Config (Visible but disabled for ease) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Target Endpoint</label>
+                                <input type="text" value="http://qupstore.com/ci/api/v1/Admin_api/createAdmin" disabled class="w-full bg-transparent text-sm text-gray-500 cursor-not-allowed">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-400 uppercase mb-1">App ID Header</label>
+                                <input type="text" id="headerAppId" value="app.com.qproject.rainbowlife" class="w-full bg-transparent text-sm text-indigo-600 font-medium focus:outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Data Fields -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <label class="text-sm font-medium text-gray-700">Hospital Name</label>
+                                <input type="text" name="hospital_name" value="Dr Rahul Tulle Clinic App" placeholder="Enter name" required class="w-full p-3 rounded-lg border border-gray-300 input-focus">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-sm font-medium text-gray-700">Contact Number</label>
+                                <input type="tel" name="hospital_contact" value="9101996915" placeholder="10 digit number" required class="w-full p-3 rounded-lg border border-gray-300 input-focus">
+                            </div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="text-sm font-medium text-gray-700">Hospital Address</label>
+                            <textarea name="hospital_address" rows="2" placeholder="Full address" required class="w-full p-3 rounded-lg border border-gray-300 input-focus">Dr Rahul Tulle Clinic App</textarea>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <label class="text-sm font-medium text-gray-700">User Email</label>
+                                <input type="email" name="user_email" value="drrahultulle@gmail.com" placeholder="email@gmail.com" required class="w-full p-3 rounded-lg border border-gray-300 input-focus">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-sm font-medium text-gray-700">Entity ID</label>
+                                <input type="text" name="entity_id" value="65132275b694a6000d2b24c2" placeholder="Mongo ID" required class="w-full p-3 rounded-lg border border-gray-300 input-focus font-mono text-sm">
+                            </div>
+                        </div>
+
+                        <div class="pt-4">
+                            <button type="submit" id="submitBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition duration-300 flex justify-center items-center gap-2 shadow-lg shadow-indigo-200">
+                                <span id="btnText">Create Admin</span>
+                                <div id="btnLoader" class="hidden loader ease-linear rounded-full border-2 border-t-2 border-gray-200 h-5 w-5"></div>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Logger Console -->
+                <div class="bg-gray-900 rounded-2xl p-6 shadow-2xl overflow-hidden border border-gray-700">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-green-400 font-mono text-sm font-bold uppercase tracking-widest">System Response</h3>
+                        <button onclick="copyResponse()" class="text-gray-400 hover:text-white text-xs flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                            </svg>
+                            Copy JSON
+                        </button>
+                    </div>
+                    <pre id="jsonOutput" class="text-indigo-300 font-mono text-xs md:text-sm overflow-auto max-h-64 whitespace-pre-wrap">Waiting for action...</pre>
+                </div>
+            </div>
+
+            <!-- Sidebar / Info Section -->
+            <div class="space-y-6">
+                <!-- Preview Card -->
+                <div class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
+                    <div class="relative z-10">
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="p-2 bg-white/20 rounded-lg">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                            </div>
+                            <span class="text-xs font-mono bg-white/10 px-2 py-1 rounded">PREVIEW</span>
+                        </div>
+                        <h4 id="previewHospital" class="text-xl font-bold mb-1">Hospital Name</h4>
+                        <p id="previewAddress" class="text-sm text-indigo-100 mb-4 opacity-80">Address will appear here</p>
+                        
+                        <div class="space-y-3 pt-4 border-t border-white/20">
+                            <div class="flex items-center gap-3 text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                                <span id="previewEmail">email@example.com</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                </svg>
+                                <span id="previewContact">Contact Info</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Decorative background shapes -->
+                    <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                    <div class="absolute -top-10 -left-10 w-24 h-24 bg-indigo-400/20 rounded-full blur-xl"></div>
+                </div>
+
+                <!-- Documentation Quick Tips -->
+                <div class="glass-morphism rounded-2xl p-6 shadow-sm border border-gray-200">
+                    <h4 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Important Notes
+                    </h4>
+                    <ul class="text-sm space-y-3 text-gray-600">
+                        <li class="flex gap-2">
+                            <span class="text-indigo-600 font-bold">•</span>
+                            <span><strong>App ID:</strong> Ensure the header `app_id` matches exactly with the project name.</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <span class="text-indigo-600 font-bold">•</span>
+                            <span><strong>Entity ID:</strong> This must be the unique ID from your MongoDB collection.</span>
+                        </li>
+                        <li class="flex gap-2">
+                            <span class="text-indigo-600 font-bold">•</span>
+                            <span><strong>CORS:</strong> Make sure browser CORS is handled if testing locally.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Notification -->
+    <div id="toast" class="fixed bottom-8 left-1/2 transform -translate-x-1/2 px-6 py-3 bg-gray-800 text-white rounded-full shadow-2xl transition-all duration-300 opacity-0 translate-y-10 flex items-center gap-2">
+        <span id="toastMsg">Action successful!</span>
+    </div>
+
+    <script>
+        const form = document.getElementById('adminForm');
+        const output = document.getElementById('jsonOutput');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const btnLoader = document.getElementById('btnLoader');
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toastMsg');
+
+        // Preview Functionality
+        const inputs = form.querySelectorAll('input, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('input', updatePreview);
+        });
+
+        function updatePreview() {
+            const formData = new FormData(form);
+            document.getElementById('previewHospital').innerText = formData.get('hospital_name') || 'Hospital Name';
+            document.getElementById('previewAddress').innerText = formData.get('hospital_address') || 'Address...';
+            document.getElementById('previewEmail').innerText = formData.get('user_email') || 'email@example.com';
+            document.getElementById('previewContact').innerText = formData.get('hospital_contact') || 'Contact Info';
+        }
+
+        // Initial preview
+        updatePreview();
+
+        function showToast(message, isError = false) {
+            toastMsg.innerText = message;
+            toast.classList.remove('opacity-0', 'translate-y-10');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            if(isError) toast.classList.add('bg-red-600');
+            else toast.classList.remove('bg-red-600');
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-10');
+                toast.classList.remove('opacity-100', 'translate-y-0');
+            }, 3000);
+        }
+
+        function copyResponse() {
+            const text = output.innerText;
+            if (text === "Waiting for action...") return;
+            
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            showToast('JSON copied to clipboard!');
+        }
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            
+            // UI State
+            btnText.innerText = "Processing...";
+            btnLoader.classList.remove('hidden');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
+
+            const formData = new FormData(form);
+            const rawAppId = document.getElementById('headerAppId').value;
+            
+            // Adjust payload for formdata according to Postman collection
+            // The API expects 'entity_id[0]'
+            const body = new FormData();
+            body.append('hospital_name', formData.get('hospital_name'));
+            body.append('hospital_address', formData.get('hospital_address'));
+            body.append('hospital_contact', formData.get('hospital_contact'));
+            body.append('entity_id[0]', formData.get('entity_id')); // Mapping to indexed field
+            body.append('user_email', formData.get('user_email'));
+
+            try {
+                const response = await fetch("http://qupstore.com/ci/api/v1/Admin_api/createAdmin", {
+                    method: 'POST',
+                    headers: {
+                        'app_id': rawAppId
+                        // Form-data handles Content-Type automatically with boundary
+                    },
+                    body: body
+                });
+
+                const data = await response.json();
+                output.innerText = JSON.stringify(data, null, 2);
+                output.classList.remove('text-red-400');
+                output.classList.add('text-indigo-300');
+                showToast('Admin created successfully!');
+
+            } catch (err) {
+                console.error(err);
+                output.innerText = `[Error]: ${err.message}\n\nNote: If this is a CORS issue, you might need to enable CORS on the server or use a proxy for local testing.`;
+                output.classList.add('text-red-400');
+                showToast('Request failed. Check console.', true);
+            } finally {
+                btnText.innerText = "Create Admin";
+                btnLoader.classList.add('hidden');
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+            }
+        };
+    </script>
+</body>
+</html>
